@@ -28,16 +28,6 @@ class Star:
         return np.arccos(x)
 
     def cartesian_to_spherical(self):
-        """Does what tin says. Currently naive and assumes principal point, 
-        field of view are defaults (see competition page)""" 
-        #TODO make this proper - work out the trig! 
-        if self.x == None or self.y == None:
-            raise Exception('Star x,y coordinates not set.')
-        deg_to_rad = np.pi/180
-        self.psi = self.y/144*deg_to_rad
-        self.theta = self.x/192*deg_to_rad
-
-    def cartesian_to_spherical(self):
         """Converts pixel position on camera image to relative spherical
         coordinates."""
         #pixel res
