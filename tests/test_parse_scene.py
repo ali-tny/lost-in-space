@@ -8,8 +8,10 @@ from startracker.star import Star
 class SceneParser_test(unittest.TestCase):
 
     def setUp(self):
-        self.test_csv_path = 'test_input.csv'
-        self.test_hip_path = 'test_hip.dat'
+        __location__ = os.path.realpath(
+            os.path.join(os.getcwd(), os.path.dirname(__file__)))
+        self.test_csv_path = os.path.join(__location__, 'test_input.csv')
+        self.test_hip_path = os.path.join(__location__, 'test_hip.dat')
         self.test_csv_row = [1,2,0.1, 3,4,0.2, 5,6,0.3, 7,8,0.4]
         self.test_csv_row_uncastable = [1,2,0.1, 'not id',5,2]
         self.test_csv_row_not_groups_of_three = [1,2,0.1, 2,3]
