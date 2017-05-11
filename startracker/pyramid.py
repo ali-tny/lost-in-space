@@ -1,4 +1,5 @@
 import sys
+import numpy as np
 from scene import Scene
 
 class Pyramid:
@@ -11,16 +12,18 @@ class Pyramid:
         full_scene = self.full_scene
         scene = self.scene
         print "finding distances"
-        all_distances = full_scene.get_all_angular_distances()
+        max_distance = np.deg2rad(14.2)
+        all_distances = full_scene.get_all_angular_distances(max_distance)
 
+        matches = []
         triplets = scene.get_triplets()
         for t in triplets:
-            distances = t.get_all_angular_distances()
             try:
-                self.find_matches_distances(distances, all_distances)
+                matches.append(self.find_matching_triplets(t, all_distances))
                 print 'Match found!'
             except Exception as e:
                 print e
+        return matches
             
         
     def find_matching_triplets(self, triplet, all_distances):
@@ -29,7 +32,7 @@ class Pyramid:
         d2 = triplet_ds.distances[1]
         d3 = triplet_ds.distances[2]
         #TODO set epsilon properly
-        epsilon = 0.0001
+        epsilon = 0.001
         rd1s = all_distances.find_close(d1, epsilon)
         matches = []
         for rd1 in rd1s.distances:

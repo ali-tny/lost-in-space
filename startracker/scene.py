@@ -30,13 +30,13 @@ class Scene:
                      star.neighbours.append(other_star)
                      other_star.neighbours.append(star)
     
-    def get_all_angular_distances(self):
+    def get_all_angular_distances(self, max_distance=None):
         stars = self.stars
         distances = Distances() 
         for i, star in enumerate(stars):
             other_stars = stars[i+1:]
             for other_star in other_stars:
-                distances.add_distance(star, other_star)
+                distances.add_distance(star, other_star, max_distance)
         distances.sort()
         return distances
 

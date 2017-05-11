@@ -51,6 +51,19 @@ class Scene_test(unittest.TestCase):
         self.assertIn(distance2, distances.distances)
         self.assertIn(distance3, distances.distances)
 
+    def test_get_all_angular_distances_max(self):
+        star1 = self.star1
+        star2 = self.star2
+        star3 = self.star3
+        distance1 = AngularDistance(star1, star2)
+        distance2 = AngularDistance(star1, star3)
+        distance3 = AngularDistance(star2, star3)
+        scene = Scene([star1,star2,star3])
+        max_distance = 2
+        distances = scene.get_all_angular_distances(max_distance)
+        self.assertIn(distance1, distances.distances)
+        self.assertIn(distance2, distances.distances)
+
     def test_get_all_angular_distances_sorted(self):
         star1 = Star(1,1,None,None,0,np.pi/4)
         star2 = Star(2,1,None,None,0,np.pi/2)

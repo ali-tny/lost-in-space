@@ -11,8 +11,13 @@ class Distances:
         self.distances = []
         self.sorted = False
 
-    def add_distance(self, star1, star2):
-        self.distances.append(AngularDistance(star1, star2))
+    def add_distance(self, star1, star2, max_distance=None):
+        d = AngularDistance(star1, star2)
+        if max_distance:
+            if d.distance < max_distance:
+                self.distances.append(d)
+        else:
+            self.distances.append(d)
 
     def sort(self):
         self.distances = sorted(self.distances, key=lambda x:x.distance)
