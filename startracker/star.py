@@ -37,6 +37,28 @@ class Star:
         self.psi = self.y/144*deg_to_rad
         self.theta = self.x/192*deg_to_rad
 
+    def cartesian_to_spherical(self):
+        """Converts pixel position on camera image to relative spherical
+        coordinates."""
+        #pixel res
+        res_x = 1920
+        res_y = 1440
+        #normalised focal length - since FOV is 10 degrees, and considering
+        #sensor width to be 1
+        f=0.5/np.tan(np.deg2rad(10) / 2)
+
+        #normalise pixel positions
+        x = self.x/res_x - 0.5
+        y = self.y/res_y - 0.5
+
+        theta = np.pi - np.arctan2(y,x)
+
+        r = np.sqrt(x**2 + y**2)
+        psi1 = np.arctan(r/f)
+        psi = np.pi/2 - psi1
+        self.theta = theta
+        self.psi = psi
+
     def spherical_to_cartesian(self):
         if self.psi == None or self.theta == None:
             raise Exception('Star theta,psi coordinates not set.')
