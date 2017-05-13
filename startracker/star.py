@@ -1,67 +1,46 @@
+import sys
 import numpy as np
 from component import Component
 
 class Star:
-    def __init__(self, idnum, magnitude, x=None, y=None, theta=None, psi=None):
+    def __init__(self, idnum, magnitude, pixel_pos=None, sph=None):
         self.id = int(idnum)
         self.magnitude = float(magnitude)
-        self.x = float(x) if x!=None else None
-        self.y = float(y) if y!=None else None
-        self.z = None
-        self.theta = float(theta) if theta!=None else None
-        self.psi = float(psi) if psi!=None else None
+        self.cartesian = (None,None,None)
+        self.pix_pos = tuple(map(float,pixel_pos)) if pixel_pos!=None else None
+        self.sph = tuple(map(float,sph)) if sph!=None else None
         self.neighbours = [] 
+        self.matches = []
 
     def calc_angular_distance(self, star2):
         """Calculate the distance along a great-circle between the two stars,
         given their spherical coordinates"""
-        if self.theta == None or self.psi == None or star2.theta == None or \
-                self.psi == None:
+        if self.sph==None or star2.sph==None:
             raise Exception('Star angles not set.')
-        t1 = self.theta
-        t2 = star2.theta
-        p1 = self.psi
-        p2 = star2.psi
+        t1, p1 = self.sph
+        t2, p2 = star2.sph
         #Use arclength formula (with radius set to 1) from arccos of the dot
         #product of cartesian vector
         x = np.sin(p1)*np.sin(p2)+np.cos(p1)*np.cos(p2)*np.cos(t1-t2)
         return np.arccos(x)
 
-    def cartesian_to_spherical(self):
+    def unproject(self, camera):
         """Converts pixel position on camera image to relative spherical
         coordinates."""
-        #pixel res
-        res_x = 1920
-        res_y = 1440
-        #normalised focal length - since FOV is 10 degrees, and considering
-        #sensor width to be 1
-        f=0.5/np.tan(np.deg2rad(10) / 2)
-
-        #normalise pixel positions
-        x = self.x/res_x - 0.5
-        y = self.y/res_y - 0.5
-
-        theta = np.pi - np.arctan2(y,x)
-
-        r = np.sqrt(x**2 + y**2)
-        psi1 = np.arctan(r/f)
-        psi = np.pi/2 - psi1
-        self.theta = theta
-        self.psi = psi
+        pixel_pos = self.pix_pos
+        if pixel_pos==None:
+            raise Exception('Star pixel coordinates not set')
+        sph = camera.unproject(pixel_pos)
+        self.sph = sph
 
     def spherical_to_cartesian(self):
-        if self.psi == None or self.theta == None:
+        if self.sph==None:
             raise Exception('Star theta,psi coordinates not set.')
-        psi = self.psi
-        theta = self.theta
-        #self.x = np.sin(theta)*np.cos(psi)
-        #self.y = np.sin(theta)*np.sin(psi)
-        #self.z = np.cos(theta)
-        #Above I believe are wrong (not right from right ascension &
-        #declination) I've worked out below myself
-        self.x = np.cos(psi)*np.cos(theta)
-        self.y = np.cos(psi)*np.sin(theta)
-        self.z = np.sin(psi)
+        theta, psi = self.sph
+        x = np.cos(psi)*np.cos(theta)
+        y = np.cos(psi)*np.sin(theta)
+        z = np.sin(psi)
+        self.cartesian = (x,y,z)
 
     def get_connected_component(self, component=None):
         if component==None:
@@ -77,14 +56,13 @@ class Star:
 
     def __str__(self):
         return "STAR id: "+str(self.id)+ \
-                "\nx coord: "+str(self.x)+ \
-                "\ny coord: "+str(self.y)+ \
+                "\nx coord: "+str(self.pixel_pos[0])+ \
+                "\ny coord: "+str(self.pixel_pos[1])+ \
                 "\nmagnitu: "+str(self.magnitude)
         
     def __eq__(self, other):
         if (self.id == other.id and self.magnitude == other.magnitude and
-            self.x == other.x and self.y == other.y and self.z == other.z and
-            self.psi == other.psi and self.theta == other.theta):
+            self.cartesian == other.cartesian and self.sph == other.sph):
             return True
         return False
         

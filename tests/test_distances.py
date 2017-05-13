@@ -10,10 +10,10 @@ class Distances_test(unittest.TestCase):
     
     def setUp(self):
         distances = Distances()
-        self.star1 = Star(1,0,None,None,0,0)
-        self.star2 = Star(2,0,None,None,np.pi/3,0)
-        self.star3 = Star(3,0,None,None,np.pi,0)
-        self.star4 = Star(4,0,None,None,2*np.pi/3+0.001,0)
+        self.star1 = Star(1,0,sph=(0,0))
+        self.star2 = Star(2,0,sph=(np.pi/3,0))
+        self.star3 = Star(3,0,sph=(np.pi,0))
+        self.star4 = Star(4,0,sph=(2*np.pi/3+0.001,0))
         self.distance12 = AngularDistance(self.star1,self.star2)
         self.distance13 = AngularDistance(self.star1,self.star3)
         self.distance23 = AngularDistance(self.star2,self.star3)
@@ -43,7 +43,7 @@ class Distances_test(unittest.TestCase):
 
     def test_find_close_several(self):
         distances = self.distances
-        d_check = AngularDistance(self.star1,Star(5,0,None,None,np.pi/3,0))
+        d_check = AngularDistance(self.star1,Star(5,0,sph=(np.pi/3,0)))
         epsilon = np.pi/3+0.1
         close = distances.find_close(d_check,epsilon)
         self.assertEquals(len(close.distances), 2)
@@ -87,7 +87,7 @@ class Distances_test(unittest.TestCase):
 
     def test_reduce_to_one_distance_all_gone(self):
         distances = self.distances 
-        d = AngularDistance(self.star4, Star(5,0,None,None,0,0))
+        d = AngularDistance(self.star4, Star(5,0,sph=(0,0)))
         new_distances = distances.reduce_to_one_distance(d)
         self.assertEquals(new_distances.distances, [])
     

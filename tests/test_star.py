@@ -3,6 +3,7 @@ import sys, os
 import numpy as np
 sys.path.append(os.path.abspath(sys.path[0]) + '/../')
 from startracker.star import Star
+from startracker.camera import Camera
 
 class Star_test(unittest.TestCase):
 
@@ -12,24 +13,18 @@ class Star_test(unittest.TestCase):
     def test_init_cartesian(self):
         idnum = 1
         magnitude = 4
-        x = 5
-        y = 6
-        theta = None
-        psi = None
+        pixel_pos = (5,6)
         try:
-            return Star(idnum, magnitude, x, y)
+            return Star(idnum, magnitude, pixel_pos)
         except:
             self.fail('Couldn\'t initialise star class')
 
     def test_init_spherical(self):
         idnum = 1
         magnitude = 4
-        x = None
-        y = None
-        theta = 40
-        psi = 11
+        sph=(40,11)
         try:
-            return Star(idnum, magnitude, None, None, theta, psi)
+            return Star(idnum, magnitude, sph=sph)
         except:
             self.fail('Couldn\'t initialise star class')
             
@@ -43,60 +38,31 @@ class Star_test(unittest.TestCase):
             star.calc_angular_distance(star2)
 
     def test_calc_angular_distance_1d(self):
-        star1 = Star(1, 0, None, None, 40*self.d2r, 0)
-        star2 = Star(2, 0, None, None, 50*self.d2r, 0)
+        star1 = Star(1, 0, sph=(40*self.d2r, 0))
+        star2 = Star(2, 0, sph=(50*self.d2r, 0))
         angle = round(star1.calc_angular_distance(star2), 5)
         check = round(10*self.d2r, 5)
         self.assertEquals(angle, check)
 
     def test_calc_angular_distance_0(self):
-        star1 = Star(1, 0, None, None, 40, 11)
-        star2 = Star(2, 0, None, None, 40, 11)
+        star1 = Star(1, 0,sph=(40, 11))
+        star2 = Star(2, 0,sph=(40, 11))
         self.assertEquals(star1.calc_angular_distance(star2), 0)
 
     def test_calc_angular_distance_180(self):
-        star1 = Star(1, 0, None, None, 315*self.d2r, 45*self.d2r)
-        star2 = Star(2, 0, None, None, 135*self.d2r, -45*self.d2r)
+        star1 = Star(1, 0,sph=(315*self.d2r, 45*self.d2r))
+        star2 = Star(2, 0,sph=(135*self.d2r, -45*self.d2r))
         angle = round(star1.calc_angular_distance(star2), 5)
         check = round(np.pi, 5)
         self.assertEquals(angle, check)
 
-    def test_cartesian_to_spherical_raise(self):
+    def test_unproject_raise(self):
         star = self.test_init_spherical()
         with self.assertRaises(Exception, msg='Star x,y coordinates not set.'):
-            star.cartesian_to_spherical()
+            star.unproject(camera)
         star = [1,2,3]
         with self.assertRaises(Exception, msg='Star x,y coordinates not set.'):
-            star.cartesian_to_spherical()
-
-    def test_cartesian_to_spherical(self):
-        star = Star(1, 1, 960, 720)
-        star.cartesian_to_spherical()
-        self.assertEquals(star.theta, np.pi)
-        self.assertEquals(star.psi, np.pi/2)
-        star = Star(1, 1, 960, 0)
-        star.cartesian_to_spherical()
-        self.assertEquals(star.theta, 3*np.pi/2)
-        self.assertEquals(star.psi, np.pi/2-np.deg2rad(5))
-        star = Star(1, 1, 960, 1440)
-        star.cartesian_to_spherical()
-        self.assertEquals(star.theta, np.pi/2)
-        self.assertEquals(star.psi, np.pi/2-np.deg2rad(5))
-        star = Star(1, 1, 1920, 720)
-        star.cartesian_to_spherical()
-        self.assertEquals(star.theta, np.pi)
-        self.assertEquals(star.psi, np.pi/2-np.deg2rad(5))
-        star = Star(1, 1, 0, 720)
-        star.cartesian_to_spherical()
-        self.assertEquals(star.theta, 0)
-        self.assertEquals(star.psi, np.pi/2-np.deg2rad(5))
-        star = Star(1, 1, 0, 0)
-        star2 = Star(2, 1, 1920, 1440)
-        star.cartesian_to_spherical()
-        star2.cartesian_to_spherical()
-        d = star.calc_angular_distance(star2)
-        actual = 2*np.arctan(np.tan(np.deg2rad(5))*np.sqrt(2))
-        self.assertEquals(round(d,5), round(actual, 5))
+            star.unproject(camera)
 
     def test_spherical_to_cartesian_raise(self):
         star = self.test_init_cartesian()
@@ -109,18 +75,17 @@ class Star_test(unittest.TestCase):
             star.spherical_to_cartesian()
 
     def test_spherical_to_cartesian(self):
-        star = Star(1, 0, None, None, 45*self.d2r, 45*self.d2r)
+        camera = Camera()
+        star = Star(1, 0,sph=(45*self.d2r, 45*self.d2r))
         star.spherical_to_cartesian()
-        self.assertEquals(round(star.x, 5), 0.5)
-        self.assertEquals(round(star.y, 5), 0.5)
-        self.assertEquals(round(star.z, 5), round(1/np.sqrt(2), 5))
-        star = Star(1, 0, None, None, 0, 0)
+        self.assertEquals(round(star.cartesian[0], 5), 0.5)
+        self.assertEquals(round(star.cartesian[1], 5), 0.5)
+        self.assertEquals(round(star.cartesian[2], 5), round(1/np.sqrt(2), 5))
+        star = Star(1, 0,sph=(0, 0))
         star.spherical_to_cartesian()
-        self.assertEquals(star.x, 1)
-        self.assertEquals(star.y, 0)
-        self.assertEquals(star.z, 0)
+        self.assertEquals(star.cartesian[0], 1)
+        self.assertEquals(star.cartesian[1], 0)
+        self.assertEquals(star.cartesian[2], 0)
         
-
-
         
 

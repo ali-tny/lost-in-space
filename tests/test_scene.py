@@ -12,11 +12,11 @@ class Scene_test(unittest.TestCase):
         #Degrees to radians
         d2r = np.pi/180
         self.d2r = d2r
-        self.star1 = Star(1,3.1,None,None,45*d2r,45*d2r)
-        self.star2 = Star(2,4.5,None,None,90*d2r,-45*d2r)
-        self.star3 = Star(3,1.3,None,None,180*d2r,60*d2r)
-        self.star4 = Star(4,2.4,None,None,225*d2r,20*d2r)
-        self.star5 = Star(5,6.1,None,None,315*d2r,-30*d2r)
+        self.star1 = Star(1,3.1,sph=(45*d2r,45*d2r))
+        self.star2 = Star(2,4.5,sph=(90*d2r,-45*d2r))
+        self.star3 = Star(3,1.3,sph=(180*d2r,60*d2r))
+        self.star4 = Star(4,2.4,sph=(225*d2r,20*d2r))
+        self.star5 = Star(5,6.1,sph=(315*d2r,-30*d2r))
         stars = [self.star1,self.star2,self.star3,self.star4,self.star5]
         self.scene = Scene(stars)
 
@@ -65,9 +65,9 @@ class Scene_test(unittest.TestCase):
         self.assertIn(distance2, distances.distances)
 
     def test_get_all_angular_distances_sorted(self):
-        star1 = Star(1,1,None,None,0,np.pi/4)
-        star2 = Star(2,1,None,None,0,np.pi/2)
-        star3 = Star(3,1,None,None,0,np.pi)
+        star1 = Star(1,1,sph=(0,np.pi/4))
+        star2 = Star(2,1,sph=(0,np.pi/2))
+        star3 = Star(3,1,sph=(0,np.pi))
         distance1 = AngularDistance(star1, star2)
         distance2 = AngularDistance(star1, star3)
         distance3 = AngularDistance(star2, star3)

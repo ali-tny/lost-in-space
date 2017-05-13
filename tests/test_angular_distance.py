@@ -8,10 +8,10 @@ from startracker.star import Star
 class AngularDistanceTest(unittest.TestCase):
     
     def setUp(self):
-        star1 = Star(0,1,None,None,0,0)
-        star2 = Star(1,1,None,None,np.pi,0)
-        star3 = Star(2,1,None,None,np.pi/3,0)
-        star4 = Star(3,1,None,None,np.pi/2,0)
+        star1 = Star(0,1,sph=(0,0))
+        star2 = Star(1,1,sph=(np.pi,0))
+        star3 = Star(2,1,sph=(np.pi/3,0))
+        star4 = Star(3,1,sph=(np.pi/2,0))
         self.d1 = AngularDistance(star1,star2)
         self.d2 = AngularDistance(star1,star3)
         self.d3 = AngularDistance(star2,star3)

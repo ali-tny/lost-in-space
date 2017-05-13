@@ -8,22 +8,22 @@ from startracker.edge import Edge
 class Edge_test(unittest.TestCase):
 
     def test_equal_self(self):
-        s1 = Star(1,0,None,None)
-        s2 = Star(2,0,None,None)
+        s1 = Star(1,0)
+        s2 = Star(2,0)
         e = Edge(s1,s2)
         self.assertEquals(e,e)
 
     def test_equal_duplicate(self):
-        s1 = Star(1,0,None,None)
-        s2 = Star(2,0,None,None)
+        s1 = Star(1,0)
+        s2 = Star(2,0)
         e1 = Edge(s1,s2)
         e2 = Edge(s1,s2)
         self.assertEquals(e1,e2)
 
     def test_unequals(self):
-        s1 = Star(1,0,None,None)
-        s2 = Star(2,0,None,None)
+        s1 = Star(1,0)
+        s2 = Star(2,0)
         e1 = Edge(s1,s2)
-        s3 = Star(3,0,None,None)
+        s3 = Star(3,0)
         e2 = Edge(s1,s3)
         self.assertNotEquals(e1,e2)

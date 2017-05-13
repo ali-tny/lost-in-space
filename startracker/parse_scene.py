@@ -26,7 +26,7 @@ class SceneParser:
         failed = []
         for i, s in enumerate(star_list):
             try:
-                stars.append(Star(i,s[2],s[0],s[1]))
+                stars.append(Star(i,s[2],pixel_pos=(s[0],s[1])))
             except ValueError:
                 failed.append(s)
         return Scene(stars), failed
@@ -44,7 +44,7 @@ class SceneParser:
                     mag = r[5]
                     theta = float(r[8])*deg_to_rad
                     psi = float(r[9])*deg_to_rad
-                    stars.append(Star(idnum, mag, None, None, theta, psi))
+                    stars.append(Star(idnum, mag, sph=(theta, psi)))
                 except ValueError:
                     failed.append(r)
             return Scene(stars), failed

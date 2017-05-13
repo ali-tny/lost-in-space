@@ -46,11 +46,12 @@ class Scene:
         for triplet in triplets_stars:
             yield Scene(triplet)
 
-    def cartesian_to_spherical(self):
-        """Convert any cartesian coords of stars to spherical."""
+    def unproject(self):
+        """Unproject any pixel positions of stars on camera image to relative 
+        spherical coordinates"""
         stars = self.stars
         for star in stars:
-            star.cartesian_to_spherical()
+            star.unproject()
         self.stars = stars
 
     def spherical_to_cartesian(self):
@@ -73,38 +74,40 @@ class Scene:
 
     def view(self):
         """Plot scene on graph."""
-        x = [star.x for star in self.stars]
-        y = [star.y for star in self.stars]
+        x = [star.pixel_pos[0] for star in self.stars]
+        y = [star.pixel_pos[1] for star in self.stars]
         plt.scatter(x,y)
         for star in self.stars:
             for star2 in star.neighbours:
-                plt.plot([star.x, star2.x], [star.y, star2.y])    
+                x1, y1 = star.pixel_pos
+                x2, y2 = star2.pixel_pos
+                plt.plot([x1, x2], [y1, y2])    
         plt.show()
 
     def view_spherical(self):
         """Plot the stars on a 3d sphere."""
-        x = [star.x for star in self.stars]
-        y = [star.y for star in self.stars]
-        z = [star.z for star in self.stars]
+        x = [star.cartesian[0] for star in self.stars]
+        y = [star.cartesian[1] for star in self.stars]
+        z = [star.cartesian[2] for star in self.stars]
         fig = plt.figure()
         ax = fig.add_subplot(111, projection='3d')
         ax.scatter(x,y,z)
         for star in self.stars:
             for star2 in star.neighbours:
-                ax.plot([star.x,star2.x], [star.y,star2.y], [star.z,star2.z])
+                x1,y1,z1 = star.cartesian
+                x2,y2,z2 = star2.cartesian
+                ax.plot([x1,x2], [y1,y2], [z1,z2])
         plt.show()
 
     def view_angular_flat(self):
         """Plot a graph of theta vs psi (2d)"""
-        x = [star.theta for star in self.stars]
-        y = [star.psi for star in self.stars]
+        x = [star.sph[0] for star in self.stars]
+        y = [star.sph[1] for star in self.stars]
         plt.scatter(x,y)
         for star in self.stars:
             for star2 in star.neighbours:
-                plt.plot([star.theta, star2.theta], [star.psi, star2.psi])
+                t1, p1 = star.sph
+                t2, p2 = star2.sph
+                plt.plot([t1, t2], [p1, p2])
         plt.show()
-
-
-
-
 
