@@ -46,12 +46,12 @@ class Scene:
         for triplet in triplets_stars:
             yield Scene(triplet)
 
-    def unproject(self):
+    def unproject(self, camera):
         """Unproject any pixel positions of stars on camera image to relative 
         spherical coordinates"""
         stars = self.stars
         for star in stars:
-            star.unproject()
+            star.unproject(camera)
         self.stars = stars
 
     def spherical_to_cartesian(self):
