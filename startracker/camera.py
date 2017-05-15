@@ -1,4 +1,5 @@
 import numpy as np
+from scene import Scene
 
 class Camera:
     
@@ -9,10 +10,23 @@ class Camera:
         #sensor width to be 1
         self.f = 0.5/np.tan(np.deg2rad(10) / 2)
         self.scene = scene
-        self.orientation = None
+        self.orientation = np.eye(3)
 
     def take_photo(self):
-        pass
+        """Take a photo of the scene in the set orientation (if none set with
+        point_at star method, its directly up at the z axis. Returns scene with
+        stars taken photograph of, with pixel positions (and spherical/cartesian
+        coordinates)"""
+        orientation = self.orientation
+        scene = self.scene
+        stars = []
+        for star in scene.stars:
+            moved_star = star.reorient(orientation)
+            moved_star.project(self)
+            if all(a<=b for a,b in zip(moved_star.pixel_pos, self.res)) and \
+                 all(a>=b for a,b in zip(moved_star.pixel_pos, (0,0))):
+                stars.append(moved_star)
+        return Scene(stars)
 
     def point_at(self, star):
         """Get an orientation matrix pointing the z axis at the star. Guidance
@@ -20,15 +34,19 @@ class Camera:
         if star.sph==None:
             raise Exception('Star angles not set.')
         star.spherical_to_cartesian()
-        star_pos = np.array(self.cartesian).reshape((3,1))
-        z_axis = np.array([0,0,1]).reshape((3,1))
-        diff = star_pos - z_axis
-        norm = np.linalg.norm(diff)
-        if norm == 0:
-            #Vector is the z axis
-            return np.eye(3)
-        v = diff/norm
-        H = 2*np.dot(v, v.transpose()) - np.eye(3)
+        star_pos = np.array(star.cartesian)
+
+        #Pick y such that it's different to z
+        y = np.array([0,0,1])
+        if np.abs(np.dot(y,star_pos))>0.99999:
+            y = np.array([0,1,0])
+
+        #Then crossing gives a perpendicular x direction
+        x = np.cross(y,star_pos)
+        x = x/np.linalg.norm(x)
+        #Crossing again gives a perpendicular y direction
+        y = np.cross(star_pos,x)
+        H = np.array([x,y,star_pos])
         self.orientation = H
         
     def unproject(self, pixel_pos):
@@ -55,14 +73,20 @@ class Camera:
         (where centre of image is the north pole)"""
         res_x, res_y = self.res
         theta, psi = sph_coords
-        theta = np.pi / 2 - theta
-        alpha = np.pi - psi
+        #If star is behind camera, return inf for camera coords 
+        if psi<=0:
+            return (np.inf, np.inf)
+
         
-        if np.absolute(theta)!=np.pi/2:
-            r = np.tan(theta)*self.f
+        if np.absolute(psi)!=np.pi/2:
+            r = np.tan(np.pi/2-psi)*self.f
         else:
             r = 0
-    
-        x = (np.cos(alpha)*r + res_x/2)*res_x
-        y = (np.sin(alpha)*r + res_y/2)*res_y
+
+        #If we don't translate theta, the x direction will be flipped. Can't do
+        # -theta since sin(-x)=-sin(x) but cos(-x)=cos(x). So need pi-theta
+        theta = np.pi-theta
+        
+        x = (np.cos(theta)*r + 0.5)*res_x
+        y = (np.sin(theta)*r + 0.5)*res_y
         return x,y

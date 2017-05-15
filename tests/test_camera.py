@@ -12,11 +12,27 @@ class CameraTest(unittest.TestCase):
         star1 = Star(0,0,sph=(0,np.pi/2))
         self.scene1 = Scene([star1])
         star1 = Star(1,0,sph=(0,0))
-        star2 = Star(2,0,sph=(0,np.deg2rad(10)))
-        self.scene2 = Scene([star2])
+        star2 = Star(2,0,sph=(0,np.deg2rad(5)))
+        star3 = Star(3,0,sph=(2*np.pi - np.deg2rad(5),0))
+        self.scene2 = Scene([star1,star2,star3])
 
     def test_take_photo(self):
-        pass 
+        cam = Camera(self.scene1)
+        scene = cam.take_photo()
+        self.assertEquals(len(scene.stars),1)
+        star = scene.stars[0]
+        self.assertEquals(star.pixel_pos, (960,720))
+        
+        cam = Camera(self.scene2)
+        scene = cam.take_photo()
+        self.assertEquals(len(scene.stars),0)
+        star = cam.scene.stars[0]
+        cam.point_at(star)
+        scene = cam.take_photo()
+        self.assertEquals(len(scene.stars),3)
+        self.assertEquals(tuple(map(round,scene.stars[0].pixel_pos)),(960,720))
+        self.assertEquals(tuple(map(round,scene.stars[1].pixel_pos)),(960,1440))
+        self.assertEquals(tuple(map(round,scene.stars[2].pixel_pos)),(1920,720))
 
     def test_unproject(self):
         camera = Camera()

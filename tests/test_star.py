@@ -10,6 +10,7 @@ class Star_test(unittest.TestCase):
     def setUp(self):
         #Degrees to radians
         self.d2r = np.pi/180
+
     def test_init_cartesian(self):
         idnum = 1
         magnitude = 4
@@ -56,6 +57,31 @@ class Star_test(unittest.TestCase):
         check = round(np.pi, 5)
         self.assertEquals(angle, check)
 
+    def test_reorient_raise(self):
+        star = Star(1,0)
+        with self.assertRaises(Exception,msg='Star theta,psi coordinates not \
+            set.'):
+            star.reorient(None)
+
+    def test_reorient_no_change(self):
+        star_orig = Star(1,0,sph=(0,0))
+        star_orig.spherical_to_cartesian()
+        star = Star(1,0,sph=(0,0))
+        camera = Camera()
+        camera.point_at(star)
+        orientation = camera.orientation
+        new_star = star.reorient(orientation)
+        self.assertEquals(star,star_orig)
+
+    def test_reorient(self):
+        star = Star(1,0,sph=(0.1204,1.283))
+        #star.spherical_to_cartesian()
+        camera = Camera()
+        camera.point_at(star)
+        orientation = camera.orientation
+        new_star = star.reorient(orientation)
+        self.assertEquals(tuple(map(round,new_star.cartesian)), (0,0,1))
+
     def test_unproject_raise(self):
         star = self.test_init_spherical()
         with self.assertRaises(Exception, msg='Star x,y coordinates not set.'):
@@ -86,6 +112,26 @@ class Star_test(unittest.TestCase):
         self.assertEquals(star.cartesian[0], 1)
         self.assertEquals(star.cartesian[1], 0)
         self.assertEquals(star.cartesian[2], 0)
-        
-        
 
+    def test_cartesian_to_spherical_raise(self):
+        star = self.test_init_spherical()
+        with self.assertRaises(Exception, msg='Star cartesian coordinates not \
+            set.'):
+            star.cartesian_to_spherical()
+        star = [1,2,3]
+        with self.assertRaises(Exception, msg='Star cartesian coordinates not \
+            set.'):
+            star.cartesian_to_spherical()
+
+    def test_cartesian_to_spherical(self):
+        camera = Camera()
+        star = Star(1, 0)
+        star.cartesian = (1/np.sqrt(2), 1/np.sqrt(2), 0)
+        star.cartesian_to_spherical()
+        self.assertEquals(star.sph[0], np.pi/4)
+        self.assertEquals(star.sph[1], 0)
+        star = Star(1, 0)
+        star.cartesian = (1/np.sqrt(2),0,1/np.sqrt(2),)
+        star.cartesian_to_spherical()
+        self.assertEquals(star.sph[0], 0)
+        self.assertEquals(round(star.sph[1],10),round(np.pi/4,10))
